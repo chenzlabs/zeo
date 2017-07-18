@@ -8,7 +8,7 @@ const {
 const protocolUtils = require('./lib/utils/protocol-utils');
 
 const TEXTURE_SIZE = 1024;
-const NUM_POSITIONS_CHUNK = 200 * 1024;
+const NUM_POSITIONS_CHUNK = 500 * 1024;
 const DEFAULT_MATRIX = [
   0, 0, 0,
   0, 0, 0, 1,
@@ -446,8 +446,8 @@ class Tree {
           input.on('gripdown', _gripdown);
 
           const chunker = chnkr.makeChunker({
-            resolution: 32,
-            range: 2,
+            resolution: 64,
+            range: 1,
           });
           const treeChunkMeshes = [];
 

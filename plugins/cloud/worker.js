@@ -38,9 +38,14 @@ const cloudTypes = [
     const numPositions = positions.length / 3;
     const indices = _makeIndices(numPositions);
     geometry.setIndex(new THREE.BufferAttribute(indices, 1));
+geometry.computeVertexNormals();
     return geometry;
   })(),
-  new THREE.BoxBufferGeometry(1, 1, 1),
+  (() => {
+    const g = new THREE.BoxBufferGeometry(1, 1, 1);
+    g.computeVertexNormals();
+    return g;
+  })(),
 ];
 const _makeCloudPatchGeometry = () => {
   const cloudGeometries = [];
@@ -70,6 +75,7 @@ const _makeCloudPatchGeometry = () => {
   }
 
   const positions = new Float32Array(NUM_POSITIONS * 3);
+  const normals = new Float32Array(NUM_POSITIONS * 3);
   const indices = new Uint32Array(NUM_POSITIONS * 3);
   let attributeIndex = 0;
   let indexIndex = 0;
@@ -77,6 +83,8 @@ const _makeCloudPatchGeometry = () => {
     const cloudGeometry = cloudGeometries[i];
     const newPositions = cloudGeometry.getAttribute('position').array;
     positions.set(newPositions, attributeIndex);
+    const newNormals = cloudGeometry.getAttribute('normal').array;
+    normals.set(newNormals, attributeIndex);
     const newIndices = cloudGeometry.index.array;
     _copyIndices(newIndices, indices, indexIndex, attributeIndex / 3);
 
@@ -86,6 +94,7 @@ const _makeCloudPatchGeometry = () => {
 
   const geometry = new THREE.BufferGeometry();
   geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(positions.buffer, positions.byteOffset, attributeIndex), 3));
+  geometry.addAttribute('normal', new THREE.BufferAttribute(new Float32Array(normals.buffer, normals.byteOffset, attributeIndex), 3));
   geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices.buffer, indices.byteOffset, indexIndex), 1));
   return geometry;
 };
@@ -100,6 +109,7 @@ const cloudPatchGeometries = (() => {
 
 const _makeCloudChunkMesh = (x, y, cloudPatchGeometries) => {
   const positions = new Float32Array(NUM_POSITIONS_CHUNK * 3);
+  const normals = new Float32Array(NUM_POSITIONS_CHUNK * 3);
   const indices = new Uint32Array(NUM_POSITIONS_CHUNK * 3);
   let attributeIndex = 0;
   let indexIndex = 0;
@@ -128,6 +138,8 @@ const _makeCloudChunkMesh = (x, y, cloudPatchGeometries) => {
       .applyMatrix(matrix);
     const newPositions = geometry.getAttribute('position').array;
     positions.set(newPositions, attributeIndex);
+    const newNormals = geometry.getAttribute('normal').array;
+    normals.set(newNormals, attributeIndex);
     const newIndices = geometry.index.array;
     _copyIndices(newIndices, indices, indexIndex, attributeIndex / 3);
 
@@ -137,6 +149,7 @@ const _makeCloudChunkMesh = (x, y, cloudPatchGeometries) => {
 
   return {
     positions: new Float32Array(positions.buffer, positions.byteOffset, attributeIndex),
+    normals: new Float32Array(normals.buffer, normals.byteOffset, attributeIndex),
     indices: new Uint32Array(indices.buffer, indices.byteOffset, indexIndex),
   };
 };

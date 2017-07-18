@@ -59,6 +59,7 @@ const DATA = {
 
 class Ocean {
   mount() {
+    return;
     const {three, render, elements, pose, world, utils: {random: randomUtils, hash: hashUtils}} = zeo;
     const {THREE, scene, renderer} = three;
     const {chnkr} = randomUtils;

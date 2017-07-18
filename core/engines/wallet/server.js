@@ -24,9 +24,9 @@ constructor(archae) {
       }
 
       listen() {
-        this._timeout = setTimeout(() => {
+        /* this._timeout = setTimeout(() => {
           this.emit('timeout');
-        }, TIMEOUT);
+        }, TIMEOUT); */
       }
 
       kick() {

@@ -306,8 +306,8 @@ class Grass {
           };
 
           const chunker = chnkr.makeChunker({
-            resolution: 32,
-            range: 2,
+            resolution: 64,
+            range: 1,
           });
           const grassChunkMeshes = [];
 

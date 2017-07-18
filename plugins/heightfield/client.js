@@ -6,7 +6,7 @@ const {
 } = require('./lib/constants/constants');
 const protocolUtils = require('./lib/utils/protocol-utils');
 
-const NUM_POSITIONS_CHUNK = 100 * 1024;
+const NUM_POSITIONS_CHUNK = 400 * 1024;
 const LIGHTMAP_PLUGIN = 'plugins-lightmap';
 const DAY_NIGHT_SKYBOX_PLUGIN = 'plugins-day-night-skybox';
 
@@ -284,8 +284,8 @@ class Heightfield {
     };
 
     const chunker = chnkr.makeChunker({
-      resolution: 32,
-      range: 4,
+      resolution: 64,
+      range: 2,
     });
     const mapChunkMeshes = {};
 

@@ -19896,10 +19896,12 @@ module.exports = (() => {
 		var cameraL = new PerspectiveCamera();
 		cameraL.bounds = new Vector4( 0.0, 0.0, 0.5, 1.0 );
 		cameraL.layers.enable( 1 );
+    cameraL.name = 'left';
 
 		var cameraR = new PerspectiveCamera();
 		cameraR.bounds = new Vector4( 0.5, 0.0, 0.5, 1.0 );
 		cameraR.layers.enable( 2 );
+    cameraR.name = 'right';
 
 		var cameraVR = new ArrayCamera( [ cameraL, cameraR ] );
 		cameraVR.layers.enable( 1 );
@@ -19996,10 +19998,23 @@ module.exports = (() => {
 
 			//
 
+      cameraVR.fov = camera.fov;
+      cameraVR.aspect = camera.aspect;
+      cameraVR.near = camera.near;
+      cameraVR.far = camera.far;
 			cameraVR.matrixWorld.copy( camera.matrixWorld );
 			cameraVR.matrixWorldInverse.copy( camera.matrixWorldInverse );
 
+      cameraL.fov = camera.fov;
+      cameraL.aspect = camera.aspect;
+      cameraL.near = camera.near;
+      cameraL.far = camera.far;
 			cameraL.matrixWorldInverse.fromArray( frameData.leftViewMatrix );
+
+      cameraR.fov = camera.fov;
+      cameraR.aspect = camera.aspect;
+      cameraR.near = camera.near;
+      cameraR.far = camera.far;
 			cameraR.matrixWorldInverse.fromArray( frameData.rightViewMatrix );
 
 			if ( this.standing && stageParameters ) {
@@ -20032,6 +20047,8 @@ module.exports = (() => {
 			// https://github.com/w3c/webvr/issues/203
 
 			cameraVR.projectionMatrix.copy( cameraL.projectionMatrix );
+			cameraVR.matrix.copy( cameraL.matrix );
+			cameraVR.matrixWorld.copy( cameraL.matrixWorld );
 
 			//
 
@@ -20391,6 +20408,7 @@ module.exports = (() => {
 			_currentScissorTest = null,
 
 			_currentViewport = new Vector4(),
+			_recursing = false,
 
 			//
 
@@ -21384,9 +21402,27 @@ if (callback() !== false) { // XXX
 
 			if ( vr.enabled ) {
 
+        // const oldCamera = camera;
 				camera = vr.getCamera( camera );
 
-			}
+        if (camera.cameras && scene.onBeforeRenderEye && !_recursing) {
+          _recursing = true;
+
+          scene.onBeforeRenderEye(camera.cameras[0]);
+          scene.onBeforeRenderEye(camera.cameras[1]);
+
+          _recursing = false;
+        }
+
+			} else {
+        if (scene.onBeforeRenderEye && !_recursing) {
+          _recursing = true;
+
+          scene.onBeforeRenderEye(camera);
+
+          _recursing = false;
+        }
+      }
 
 			_projScreenMatrix.multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse );
 			_frustum.setFromMatrix( _projScreenMatrix );
@@ -21974,7 +22010,7 @@ if (callback() !== false) { // XXX
 
 				// Avoid unneeded uniform updates per ArrayCamera's sub-camera
 
-				if ( _currentCamera !== ( _currentArrayCamera || camera ) ) {
+				if ( _currentCamera !== ( _currentArrayCamera || camera ) || material.volatile ) {
 
 					_currentCamera = ( _currentArrayCamera || camera );
 

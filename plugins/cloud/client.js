@@ -9,27 +9,32 @@ const DAY_NIGHT_SKYBOX_PLUGIN = 'plugins-day-night-skybox';
 
 const CLOUD_SHADER = {
   uniforms: {
-    worldTime: {
+    /* worldTime: {
       type: 'f',
       value: 0,
-    },
+    }, */
     sunIntensity: {
       type: 'f',
       value: 0,
     },
   },
   vertexShader: `\
-uniform float worldTime;
+// uniform float worldTime;
+varying vec3 vN;
 
 void main() {
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(position.x - ((worldTime / 1000.0) * ${CLOUD_SPEED.toFixed(8)}), position.y, position.z, 1.0);
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position.x, position.y, position.z, 1.0);
+  vN = normal;
 }
 `,
   fragmentShader: `\
 uniform float sunIntensity;
+varying vec3 vN;
+
+vec3 l = normalize(vec3(1.0, -1.0, 1.0));
 
 void main() {
-  gl_FragColor = vec4((0.4 + 0.6 * sunIntensity) * vec3(1.0), 0.5);
+  gl_FragColor = vec4(vec3(0.2 + (1.0 * sunIntensity) + (0.2 + (1.0 * sunIntensity)) * dot(vN, l)), 0.5);
 }
 `
 };
@@ -54,8 +59,8 @@ class Cloud {
       uniforms: THREE.UniformsUtils.clone(CLOUD_SHADER.uniforms),
       vertexShader: CLOUD_SHADER.vertexShader,
       fragmentShader: CLOUD_SHADER.fragmentShader,
-      transparent: true,
-      depthWrite: false,
+      // transparent: true,
+      // depthWrite: false,
     });
     /* const cloudsMaterial = new THREE.MeshBasicMaterial({
       color: 0xFFFFFF,
@@ -96,16 +101,16 @@ class Cloud {
       entityAddedCallback(entityElement) {
         const chunker = chnkr.makeChunker({
           resolution: NUM_CELLS,
-          range: 3,
+          range: 1,
         });
 
         const cloudChunkMeshes = [];
         const _makeCloudChunkMesh = (cloudChunkData, dx) => {
-          const {positions, indices} = cloudChunkData;
+          const {positions, normals, indices} = cloudChunkData;
 
           const geometry = new THREE.BufferGeometry();
           geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
-          const numPositions = positions.length / 3;
+          geometry.addAttribute('normal', new THREE.BufferAttribute(normals, 3));
           geometry.setIndex(new THREE.BufferAttribute(indices, 1));
 
           const material = cloudsMaterial;
@@ -157,7 +162,7 @@ class Cloud {
             updating = true;
 
             const done = () => {
-              updating = false;
+              // updating = false;
 
               if (updateQueued) {
                 updateQueued = false;
@@ -181,7 +186,7 @@ class Cloud {
         const update = () => {
           tryCloudChunkUpdate();
 
-          cloudsMaterial.uniforms.worldTime.value = world.getWorldTime();
+          // cloudsMaterial.uniforms.worldTime.value = world.getWorldTime();
           cloudsMaterial.uniforms.sunIntensity.value = (() => {
             const dayNightSkyboxEntity = elements.getEntitiesElement().querySelector(DAY_NIGHT_SKYBOX_PLUGIN);
             return (dayNightSkyboxEntity && dayNightSkyboxEntity.getSunIntensity) ? dayNightSkyboxEntity.getSunIntensity() : 0;

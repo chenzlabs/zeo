@@ -13,7 +13,7 @@ const {
 const protocolUtils = require('./lib/utils/protocol-utils');
 
 const NUM_POSITIONS = 30 * 1024;
-const NUM_POSITIONS_CHUNK = 100 * 1024;
+const NUM_POSITIONS_CHUNK = 500 * 1024;
 const CAMERA_ROTATION_ORDER = 'YXZ';
 const TEXTURE_SIZE = 1024;
 const TEXTURE_CHUNK_SIZE = 512;
